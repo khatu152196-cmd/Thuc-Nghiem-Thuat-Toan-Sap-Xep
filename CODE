@@ -1,1 +1,258 @@
 
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <algorithm>
+#include <ctime>
+
+using namespace std;
+
+const int n = 1000000;
+
+void LuuFile (float a[], int n, string Ten)
+{
+    ofstream tep(Ten);
+    for (int i=0; i<n; i++)
+    {
+        tep << a[i] << endl;
+    }
+    tep.close();
+}
+
+void DocFile(float a[], int n, string Ten)
+{
+    ifstream tep(Ten);
+    for (int i = 0; i < n; i++)
+    {
+        tep >> a[i];
+    }
+    tep.close();
+}
+
+void TangDan(float a[], int n)
+{
+    for (int i=0; i<n; i++)
+    {
+        a[i] = i + 1;
+    }
+}
+
+void GiamDan(float a[], int n)
+{
+    for (int i=0; i<n; i++)
+    {
+        a[i] = n -i;
+    }
+}
+
+void NgauNhien(float a[], int n)
+{
+    for (int i=0; i<n; i++)
+    {
+        a[i]= (float)rand() / RAND_MAX * 1000000000;
+    }
+}
+
+void QuickSort(float a[], int trai, int phai)
+{
+    int i = trai;
+    int j = phai;
+    float pivot = a[(trai + phai) / 2];
+
+    while (i <= j)
+    {
+        while (a[i] < pivot)
+            i++;
+        while (a[j] > pivot)
+            j--;
+
+        if (i <= j)
+        {
+            swap(a[i], a[j]);
+            i++;
+            j--;
+        }
+    }
+    if (trai < j)
+        QuickSort(a, trai, j);
+    if (i < phai)
+        QuickSort(a, i, phai);
+}
+
+void ExtraMax (float a[], int n, int i)
+{
+    while (i<n)
+    {
+        int trai = 2*i +1;
+        int phai = 2*i +2;
+
+        int lonnhat = i;
+
+        if (trai < n && a[trai] > a[lonnhat])
+            lonnhat= trai;
+        if (phai < n && a[phai] > a[lonnhat])
+            lonnhat= phai;
+
+        if (lonnhat != i)
+        {
+            swap(a[i], a[lonnhat]);
+            i=lonnhat;
+        }
+        else
+            break;
+    }
+}
+
+void HeapSort(float a[], int n)
+{
+    for (int i=n/2-1; i>=0; i--)
+    {
+        ExtraMax(a,n,i);
+    }
+
+    for (int i= n-1; i>0; i--)
+    {
+        swap(a[0], a[i]);
+        ExtraMax(a,i,0);
+    }
+
+}
+
+void Merge(float a[], int trai, int giua, int phai)
+{
+    int i = trai;
+    int j = giua + 1;
+    int k = 0;
+
+    int n = phai - trai + 1;
+    float *b = new float[n];
+
+    while (i <= giua && j <= phai)
+    {
+        if (a[i] < a[j])
+        {
+            b[k] = a[i];
+            i++;
+        }
+        else
+        {
+            b[k] = a[j];
+            j++;
+        }
+        k++;
+    }
+
+    while (i <= giua)
+    {
+        b[k] = a[i];
+        i++;
+        k++;
+    }
+
+    while (j <= phai)
+    {
+        b[k] = a[j];
+        j++;
+        k++;
+    }
+
+    for (int i = 0; i < n; i++)
+    {
+        a[trai + i] = b[i];
+    }
+    delete[] b;
+}
+
+void MergeSort(float a[], int trai, int phai)
+{
+    if (trai >= phai)
+        return;
+
+    int giua = (trai + phai) / 2;
+
+    MergeSort(a, trai, giua);
+    MergeSort(a, giua + 1, phai);
+    Merge(a, trai, giua, phai);
+}
+
+void Sort(float a[], int n)
+{
+    sort(a, a + n);
+}
+
+
+int main()
+{
+    srand(time(NULL));
+
+    float *a = new float[n];
+
+    TangDan(a, n);
+    LuuFile(a, n, "day1.txt");
+
+    GiamDan(a, n);
+    LuuFile(a, n, "day2.txt");
+
+    for (int i = 3; i <= 10; i++)
+    {
+        NgauNhien(a, n);
+        string Ten = "day" + to_string(i) + ".txt";
+        LuuFile(a, n, Ten);
+    }
+
+    clock_t BatDau, KetThuc;
+    double ThoiGian, ClockGiay;
+
+    for (int soFile = 1; soFile <= 10; soFile++)
+    {
+        string Ten = "day" + to_string(soFile) + ".txt";
+
+        cout << "==========================" << endl;
+        cout << Ten << endl;
+        cout << "==========================" << endl;
+
+        DocFile(a, n, Ten);
+        BatDau = clock();
+        QuickSort(a, 0, n - 1);
+        KetThuc = clock();
+
+        ThoiGian = (double)(KetThuc - BatDau);
+        ClockGiay = ThoiGian / CLOCKS_PER_SEC;
+        cout << "QuickSort: " << ClockGiay << " giay" << endl;
+
+
+        DocFile(a, n, Ten);
+        BatDau = clock();
+        HeapSort(a, n);
+        KetThuc = clock();
+
+        ThoiGian = (double)(KetThuc - BatDau);
+        ClockGiay = ThoiGian / CLOCKS_PER_SEC;
+        cout << "HeapSort: " << ClockGiay << " giay" << endl;
+
+
+        DocFile(a, n, Ten);
+        BatDau = clock();
+        MergeSort(a, 0, n - 1);
+        KetThuc = clock();
+
+        ThoiGian = (double)(KetThuc - BatDau);
+        ClockGiay = ThoiGian / CLOCKS_PER_SEC;
+        cout << "MergeSort: " << ClockGiay << " giay" << endl;
+
+
+        DocFile(a, n, Ten);
+        BatDau = clock();
+        Sort(a, n);
+        KetThuc = clock();
+
+        ThoiGian = (double)(KetThuc - BatDau);
+        ClockGiay = ThoiGian / CLOCKS_PER_SEC;
+        cout << "C++ Sort: " << ClockGiay << " giay" << endl;
+
+        cout << endl;
+    }
+
+    delete[] a;
+    return 0;
+}
